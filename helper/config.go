@@ -11,6 +11,7 @@ import (
 // preset values are used if the env is not set
 var MemEnvs = map[string]string{
 	"PORT": "3001",
+	"HOST": "http://localhost:3001",
 }
 
 // LoadEnvs loads envs from the system
@@ -18,7 +19,7 @@ func LoadEnvs() {
 	for key := range MemEnvs {
 		env := os.Getenv(key)
 		if env == "" {
-			zap.L().Info("using default", zap.String("key", key), zap.String("value", env))
+			zap.L().Info("using default env", zap.String("key", key), zap.String("value", MemEnvs[key]))
 			continue
 		}
 		MemEnvs[key] = env
