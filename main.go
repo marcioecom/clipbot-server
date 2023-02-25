@@ -1,0 +1,10 @@
+package main
+
+import (
+	"github.com/marcioecom/clipbot-server/helper"
+)
+
+func main() {
+	helper.InitLogger()
+	helper.LoadEnvs()
+}
