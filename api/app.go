@@ -1,17 +1,13 @@
 package api
 
 import (
-	"fmt"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/marcioecom/clipbot-server/helper"
-	"go.uber.org/zap"
 )
 
-// Start starts the API server
-func Start() {
+// Setup starts the API server
+func Setup() *fiber.App {
 	app := fiber.New(fiber.Config{
 		BodyLimit: 1024 * 1024 * 2000,
 	})
@@ -30,8 +26,5 @@ func Start() {
 
 	setupRoutes(app)
 
-	port := fmt.Sprintf(":%s", helper.GetEnv("PORT"))
-	if err := app.Listen(port); err != nil {
-		zap.L().Fatal("failed to start server", zap.Error(err))
-	}
+	return app
 }

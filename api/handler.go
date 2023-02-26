@@ -25,7 +25,7 @@ func handleFileUpload(c *fiber.Ctx) error {
 		zap.L().Error("video upload error", zap.Error(err))
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
-			"message": "Error uploading video",
+			"message": fmt.Sprintf("error uploading video: %v", err),
 		})
 	}
 
@@ -35,13 +35,14 @@ func handleFileUpload(c *fiber.Ctx) error {
 	fileext := strings.Split(file.Filename, ".")[1]
 
 	video := fmt.Sprintf("%s.%s", filename, fileext)
+	filepath := fmt.Sprintf("./videos/%s", video)
 
 	// TODO: upload to a cloud storage
-	if err := c.SaveFile(file, fmt.Sprintf("./videos/%s", video)); err != nil {
+	if err := c.SaveFile(file, filepath); err != nil {
 		zap.L().Error("video save error", zap.Error(err))
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
-			"message": "Error saving video",
+			"message": fmt.Sprintf("error saving video: %v", err),
 		})
 	}
 
@@ -52,7 +53,7 @@ func handleFileUpload(c *fiber.Ctx) error {
 	videourl := fmt.Sprintf("%s/videos/%s", helper.GetEnv("host"), video)
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"success":   true,
-		"message":   "Video uploaded successfully",
+		"message":   "video uploaded successfully",
 		"videoUrl":  videourl,
 		"videoName": video,
 		"header":    file.Header,

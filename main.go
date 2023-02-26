@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"os/signal"
 	"time"
@@ -22,7 +23,11 @@ func main() {
 		SaslPassword: helper.GetEnv("kafka_password"),
 	})
 
-	api.Start()
+	app := api.Setup()
+	port := fmt.Sprintf(":%s", helper.GetEnv("PORT"))
+	if err := app.Listen(port); err != nil {
+		zap.L().Fatal("failed to start server", zap.Error(err))
+	}
 
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, os.Interrupt)
