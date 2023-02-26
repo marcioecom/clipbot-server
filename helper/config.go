@@ -10,15 +10,18 @@ import (
 // MemEnvs is a map of envs to avoid make system calls
 // preset values are used if the env is not set
 var MemEnvs = map[string]string{
-	"PORT": "3001",
-	"HOST": "http://localhost:3001",
+	"PORT":           "3001",
+	"HOST":           "http://localhost:3001",
+	"KAFKA_URL":      "localhost:9092",
+	"KAFKA_USERNAME": "admin",
+	"KAFKA_PASSWORD": "admin",
 }
 
 // LoadEnvs loads envs from the system
 func LoadEnvs() {
 	for key := range MemEnvs {
-		env := os.Getenv(key)
-		if env == "" {
+		env, ok := os.LookupEnv(key)
+		if !ok {
 			zap.L().Info("using default env", zap.String("key", key), zap.String("value", MemEnvs[key]))
 			continue
 		}

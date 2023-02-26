@@ -6,7 +6,9 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"github.com/marcioecom/clipbot-server/constants"
 	"github.com/marcioecom/clipbot-server/helper"
+	"github.com/marcioecom/clipbot-server/infra/queue"
 	"go.uber.org/zap"
 )
 
@@ -42,8 +44,11 @@ func handleFileUpload(c *fiber.Ctx) error {
 		})
 	}
 
-	videourl := fmt.Sprintf("%s/videos/%s", helper.GetEnv("host"), video)
+	if err := queue.Producer.Produce(constants.ClipTopic, []byte(video)); err != nil {
+		zap.L().Error("failed to send message", zap.Error(err))
+	}
 
+	videourl := fmt.Sprintf("%s/videos/%s", helper.GetEnv("host"), video)
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"success":   true,
 		"message":   "Video uploaded successfully",
