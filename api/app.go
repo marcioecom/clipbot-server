@@ -12,7 +12,9 @@ import (
 
 // Start starts the API server
 func Start() {
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		BodyLimit: 1024 * 1024 * 2000,
+	})
 
 	app.Use(logger.New(logger.Config{
 		Format:     "${ip}:${port} ${time} ${status} - ${method} ${path} ${latency}\n",
@@ -20,7 +22,10 @@ func Start() {
 		TimeZone:   "America/Sao_Paulo",
 	}))
 
-	app.Use(cors.New())
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "*",
+		AllowMethods: "GET,POST,PUT,DELETE,OPTIONS",
+	}))
 	app.Static("/videos", "./videos")
 
 	setupRoutes(app)
