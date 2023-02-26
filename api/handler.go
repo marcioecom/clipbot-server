@@ -36,6 +36,7 @@ func handleFileUpload(c *fiber.Ctx) error {
 
 	video := fmt.Sprintf("%s.%s", filename, fileext)
 
+	// TODO: upload to a cloud storage
 	if err := c.SaveFile(file, fmt.Sprintf("./videos/%s", video)); err != nil {
 		zap.L().Error("video save error", zap.Error(err))
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
