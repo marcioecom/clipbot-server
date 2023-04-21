@@ -2,6 +2,9 @@ package api
 
 import (
 	"fmt"
+	"os"
+	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -32,13 +35,15 @@ func handleFileUpload(c *fiber.Ctx) error {
 	id := uuid.New()
 
 	filename := strings.Replace(id.String(), "-", "", -1)
-	fileext := strings.Split(file.Filename, ".")[1]
+	fileext := filepath.Ext(file.Filename)
 
 	video := fmt.Sprintf("%s.%s", filename, fileext)
-	filepath := fmt.Sprintf("./videos/%s", video)
+	dir, _ := os.Getwd()
+
+	uploadDir := path.Join(dir, "..", fmt.Sprintf("videos/%s", video))
 
 	// TODO: upload to a cloud storage
-	if err := c.SaveFile(file, filepath); err != nil {
+	if err := c.SaveFile(file, uploadDir); err != nil {
 		zap.L().Error("video save error", zap.Error(err))
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -51,7 +56,7 @@ func handleFileUpload(c *fiber.Ctx) error {
 	}
 
 	videourl := fmt.Sprintf("%s/videos/%s", helper.GetEnv("host"), video)
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success":   true,
 		"message":   "video uploaded successfully",
 		"videoUrl":  videourl,
