@@ -16,12 +16,14 @@ func main() {
 	helper.InitLogger()
 	helper.LoadEnvs()
 
-	queue.Start(&queue.Config{
+	if err := queue.Start(&queue.Config{
 		GroupID:      "my-group",
-		QueueURL:     helper.GetEnv("kafka_url"),
-		SaslUsername: helper.GetEnv("kafka_username"),
-		SaslPassword: helper.GetEnv("kafka_password"),
-	})
+		QueueURL:     helper.GetEnv("kafka_url").String(),
+		SaslUsername: helper.GetEnv("kafka_username").String(),
+		SaslPassword: helper.GetEnv("kafka_password").String(),
+	}); err != nil {
+		zap.L().Fatal("failed to start queue", zap.Error(err))
+	}
 
 	app := api.Setup()
 	port := fmt.Sprintf(":%s", helper.GetEnv("PORT"))

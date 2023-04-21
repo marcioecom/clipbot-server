@@ -4,12 +4,14 @@ import (
 	"os"
 	"strings"
 
+	"github.com/joho/godotenv"
 	"go.uber.org/zap"
 )
 
 // MemEnvs is a map of envs to avoid make system calls
 // preset values are used if the env is not set
 var MemEnvs = map[string]string{
+	"ENV":            "DEVELOP",
 	"PORT":           "3001",
 	"HOST":           "http://localhost:3001",
 	"KAFKA_URL":      "localhost:9092",
@@ -19,6 +21,10 @@ var MemEnvs = map[string]string{
 
 // LoadEnvs loads envs from the system
 func LoadEnvs() {
+	if err := godotenv.Load(); err != nil {
+		zap.L().Warn("no .env file found")
+	}
+
 	for key := range MemEnvs {
 		env, ok := os.LookupEnv(key)
 		if !ok {
@@ -29,11 +35,28 @@ func LoadEnvs() {
 	}
 }
 
+type Env string
+
 // GetEnv returns the value of a given env
-func GetEnv(key string) string {
+func GetEnv(key string) Env {
 	value, ok := MemEnvs[strings.ToUpper(key)]
 	if !ok {
-		zap.L().Fatal("env not found", zap.String("key", key))
+		zap.L().Error("env not found in MemEnvs", zap.String("key", key))
 	}
-	return value
+	return Env(value)
+}
+
+func (e Env) FallBack(fallback string) string {
+	if e != "" {
+		return e.String()
+	}
+	return fallback
+}
+
+func (e Env) String() string {
+	return string(e)
+}
+
+func (e Env) Bool() bool {
+	return strings.EqualFold(string(e), "true")
 }

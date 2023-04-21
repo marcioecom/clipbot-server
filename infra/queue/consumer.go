@@ -17,7 +17,7 @@ func NewConsumer(config *Config) (IConsumer, error) {
 		"security.protocol": "SASL_SSL",
 	})
 	if err != nil {
-		zap.L().Debug("could not init consumer", zap.Error(err))
+		zap.L().Error("could not init consumer", zap.Error(err))
 		return nil, err
 	}
 

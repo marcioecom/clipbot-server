@@ -51,7 +51,10 @@ func handleFileUpload(c *fiber.Ctx) error {
 		})
 	}
 
-	if err := queue.Producer.Produce(constants.ClipTopic, []byte(video)); err != nil {
+	if err := queue.Producer.Produce(
+		helper.GetEnv("QUEUE_TOPIC").FallBack(constants.ClipTopic),
+		[]byte(video),
+	); err != nil {
 		zap.L().Error("failed to send message", zap.Error(err))
 	}
 
