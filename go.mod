@@ -3,6 +3,7 @@ module github.com/marcioecom/clipbot-server
 go 1.19
 
 require (
+	github.com/aws/aws-sdk-go v1.44.248
 	github.com/confluentinc/confluent-kafka-go/v2 v2.0.2
 	github.com/go-playground/validator/v10 v10.11.2
 	github.com/gofiber/fiber/v2 v2.42.0

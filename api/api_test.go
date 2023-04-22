@@ -64,7 +64,7 @@ func TestUnit_handleFileUpload(t *testing.T) {
 			purpose: "Success",
 			mock: func() *http.Request {
 				// mock producer
-				producermock := queue.NewProducerMocked(t)
+				producermock := new(queue.ProducerMocked)
 				producermock.On("Produce", constants.ClipTopic, tmock.Anything).Return(nil)
 				queue.Producer = producermock
 
@@ -88,7 +88,7 @@ func TestUnit_handleFileUpload(t *testing.T) {
 			purpose: "Success: failed to produce message",
 			mock: func() *http.Request {
 				// mock producer
-				producermock := queue.NewProducerMocked(t)
+				producermock := new(queue.ProducerMocked)
 				producermock.On("Produce", constants.ClipTopic, tmock.Anything).Return(errors.New("dummy error"))
 				queue.Producer = producermock
 
