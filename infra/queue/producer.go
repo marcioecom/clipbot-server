@@ -18,7 +18,7 @@ func NewProducer(config *Config) (IProducer, error) {
 		return nil, err
 	}
 
-	zap.L().Debug("producer started")
+	zap.L().Info("producer started")
 	return &producer{
 		client: p,
 	}, nil

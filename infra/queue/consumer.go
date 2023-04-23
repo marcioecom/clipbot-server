@@ -21,7 +21,7 @@ func NewConsumer(config *Config) (IConsumer, error) {
 		return nil, err
 	}
 
-	zap.L().Debug("consumer started")
+	zap.L().Info("consumer started")
 	return &consumer{
 		client: c,
 	}, nil
