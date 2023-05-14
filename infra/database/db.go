@@ -27,6 +27,10 @@ func Init() error {
 	}
 	DB = db
 
+	if err := db.Ping(); err != nil {
+		return err
+	}
+
 	zap.L().Info("connected to database")
 	return nil
 }
