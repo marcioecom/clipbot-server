@@ -17,6 +17,11 @@ var MemEnvs = map[string]string{
 	"KAFKA_URL":      "localhost:9092",
 	"KAFKA_USERNAME": "admin",
 	"KAFKA_PASSWORD": "admin",
+	"DB_HOST":        "",
+	"DB_PORT":        "",
+	"DB_NAME":        "",
+	"DB_USER":        "",
+	"DB_PASSWORD":    "",
 }
 
 // LoadEnvs loads envs from the system
