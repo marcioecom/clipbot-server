@@ -16,7 +16,7 @@ type controller struct {
 	repository repositories.IUserRepository
 }
 
-func NewUserController() IUserController {
+func NewController() IUserController {
 	return &controller{
 		repository: repositories.NewUserRepository(database.DB),
 	}
@@ -27,7 +27,7 @@ func (c *controller) Create(ctx *fiber.Ctx) error {
 
 	if err := ctx.BodyParser(u); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
+			"status":  "error",
 			"message": "Invalid request body",
 			"error":   err.Error(),
 		})
@@ -35,7 +35,7 @@ func (c *controller) Create(ctx *fiber.Ctx) error {
 
 	if err := validator.New().Struct(u); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
+			"status":  "error",
 			"message": "Invalid request body",
 			"error":   helper.HandleValidatorErr(err),
 		})
@@ -44,7 +44,7 @@ func (c *controller) Create(ctx *fiber.Ctx) error {
 	user, err := c.repository.GetByEmail(u.Email)
 	if err != nil && err != qrm.ErrNoRows {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
+			"status":  "error",
 			"message": "Failed to get user",
 			"error":   err.Error(),
 		})
@@ -52,7 +52,7 @@ func (c *controller) Create(ctx *fiber.Ctx) error {
 
 	if user != nil {
 		return ctx.Status(fiber.StatusConflict).JSON(fiber.Map{
-			"success": false,
+			"status":  "error",
 			"message": "User already exists",
 		})
 	}
@@ -60,7 +60,7 @@ func (c *controller) Create(ctx *fiber.Ctx) error {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(u.Password), 8)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
+			"status":  "error",
 			"message": "Failed to hash password",
 		})
 	}
@@ -68,13 +68,13 @@ func (c *controller) Create(ctx *fiber.Ctx) error {
 
 	if err := c.repository.Create(u); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
+			"status":  "error",
 			"message": "Failed to create user",
 		})
 	}
 
 	return ctx.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"success": true,
+		"status":  "success",
 		"message": "User created successfully",
 	})
 }
@@ -83,14 +83,14 @@ func (c *controller) GetAll(ctx *fiber.Ctx) error {
 	users, err := c.repository.GetAll()
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
+			"status":  "error",
 			"message": "Failed to get users",
 			"error":   err.Error(),
 		})
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
-		"success": true,
+		"status":  "success",
 		"message": "Users retrieved successfully",
 		"data":    users,
 	})

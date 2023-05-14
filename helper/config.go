@@ -13,6 +13,7 @@ import (
 var MemEnvs = map[string]string{
 	"ENV":            "DEVELOP",
 	"PORT":           "3001",
+	"SECRET":         "secret",
 	"HOST":           "http://localhost:3001",
 	"KAFKA_URL":      "localhost:9092",
 	"KAFKA_USERNAME": "admin",
