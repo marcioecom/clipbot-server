@@ -3,7 +3,10 @@ package api
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/marcioecom/clipbot-server/api/auth"
+	"github.com/marcioecom/clipbot-server/api/upload"
 	"github.com/marcioecom/clipbot-server/api/user"
+	"github.com/marcioecom/clipbot-server/infra/storage"
+	"go.uber.org/zap"
 )
 
 func setupRoutes(app *fiber.App) {
@@ -24,6 +27,13 @@ func setupRoutes(app *fiber.App) {
 	a.Post("/", authController.Login)
 
 	// Upload
-	//p := api.Group("/upload")
-	//p.Post("/", protected(), upload.HandleFileUpload)
+	p := api.Group("/upload")
+
+	s, err := storage.New()
+	if err != nil {
+		zap.L().Fatal("failed to start storage", zap.Error(err))
+	}
+
+	uploadController := upload.NewController(s)
+	p.Post("/", protected(), uploadController.Save)
 }

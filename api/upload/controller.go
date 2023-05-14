@@ -1,9 +1,7 @@
-package api
+package upload
 
 import (
 	"fmt"
-	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -12,17 +10,21 @@ import (
 	"github.com/marcioecom/clipbot-server/constants"
 	"github.com/marcioecom/clipbot-server/helper"
 	"github.com/marcioecom/clipbot-server/infra/queue"
+	"github.com/marcioecom/clipbot-server/infra/storage"
 	"go.uber.org/zap"
 )
 
-func healthCheck(c *fiber.Ctx) error {
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"success": true,
-		"message": "Server is healthy",
-	})
+type UploadController struct {
+	storage storage.IStorage
 }
 
-func handleFileUpload(c *fiber.Ctx) error {
+func NewController(s storage.IStorage) IUploadController {
+	return &UploadController{
+		storage: s,
+	}
+}
+
+func (u *UploadController) Save(c *fiber.Ctx) error {
 	file, err := c.FormFile("file")
 	if err != nil {
 		zap.L().Error("video upload error", zap.Error(err))
@@ -37,14 +39,20 @@ func handleFileUpload(c *fiber.Ctx) error {
 	filename := strings.Replace(id.String(), "-", "", -1)
 	fileext := filepath.Ext(file.Filename)
 
-	video := fmt.Sprintf("%s.%s", filename, fileext)
-	dir, _ := os.Getwd()
+	video := filename + fileext
+	uploadDir := fmt.Sprintf("../videos/%s", video)
 
-	uploadDir := path.Join(dir, "..", fmt.Sprintf("videos/%s", video))
+	body, err := file.Open()
+	if err != nil {
+		zap.L().Error("video open error", zap.Error(err), zap.String("video", video), zap.String("uploadDir", uploadDir))
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": fmt.Sprintf("error opening video: %v", err),
+		})
+	}
 
-	// TODO: upload to a cloud storage
-	if err := c.SaveFile(file, uploadDir); err != nil {
-		zap.L().Error("video save error", zap.Error(err))
+	if err := u.storage.Upload(video, body); err != nil {
+		zap.L().Error("video save error", zap.Error(err), zap.String("video", video), zap.String("uploadDir", uploadDir))
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": fmt.Sprintf("error saving video: %v", err),
@@ -64,7 +72,6 @@ func handleFileUpload(c *fiber.Ctx) error {
 		"message":   "video uploaded successfully",
 		"videoUrl":  videourl,
 		"videoName": video,
-		"header":    file.Header,
 		"size":      file.Size,
 	})
 }

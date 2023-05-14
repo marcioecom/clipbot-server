@@ -11,18 +11,27 @@ import (
 // MemEnvs is a map of envs to avoid make system calls
 // preset values are used if the env is not set
 var MemEnvs = map[string]string{
-	"ENV":            "DEVELOP",
-	"PORT":           "3001",
-	"SECRET":         "secret",
-	"HOST":           "http://localhost:3001",
+	"ENV":    "DEVELOP",
+	"PORT":   "3001",
+	"SECRET": "secret",
+	"HOST":   "http://localhost:3001",
+
 	"KAFKA_URL":      "localhost:9092",
 	"KAFKA_USERNAME": "admin",
 	"KAFKA_PASSWORD": "admin",
-	"DB_HOST":        "",
-	"DB_PORT":        "",
-	"DB_NAME":        "",
-	"DB_USER":        "",
-	"DB_PASSWORD":    "",
+	"QUEUE_TOPIC":    "clips.send-clip",
+
+	"DB_HOST":     "",
+	"DB_PORT":     "",
+	"DB_NAME":     "",
+	"DB_USER":     "",
+	"DB_PASSWORD": "",
+
+	"AWS_KEY":      "",
+	"AWS_SECRET":   "",
+	"AWS_REGION":   "",
+	"AWS_BUCKET":   "",
+	"AWS_ENDPOINT": "",
 }
 
 // LoadEnvs loads envs from the system
@@ -47,7 +56,7 @@ type Env string
 func GetEnv(key string) Env {
 	value, ok := MemEnvs[strings.ToUpper(key)]
 	if !ok {
-		zap.L().Error("env not found in MemEnvs", zap.String("key", key))
+		zap.L().Warn("env not found in MemEnvs", zap.String("key", key))
 	}
 	return Env(value)
 }
