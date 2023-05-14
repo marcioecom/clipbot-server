@@ -1,6 +1,9 @@
 package user
 
 import (
+	"golang.org/x/crypto/bcrypt"
+
+	"github.com/go-jet/jet/v2/qrm"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/marcioecom/clipbot-server/helper"
@@ -39,10 +42,11 @@ func (c *controller) Create(ctx *fiber.Ctx) error {
 	}
 
 	user, err := c.repository.GetByEmail(u.Email)
-	if err != nil {
+	if err != nil && err != qrm.ErrNoRows {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
 			"message": "Failed to get user",
+			"error":   err.Error(),
 		})
 	}
 
@@ -52,6 +56,15 @@ func (c *controller) Create(ctx *fiber.Ctx) error {
 			"message": "User already exists",
 		})
 	}
+
+	bytes, err := bcrypt.GenerateFromPassword([]byte(u.Password), 8)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Failed to hash password",
+		})
+	}
+	u.Password = string(bytes)
 
 	if err := c.repository.Create(u); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -63,7 +76,6 @@ func (c *controller) Create(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"success": true,
 		"message": "User created successfully",
-		"data":    u,
 	})
 }
 
